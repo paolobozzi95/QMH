@@ -3,6 +3,7 @@
 library(readxl)
 
 #call the excel files, now called data, data2, data3
+#make sure you change your working directory!
 data <- read_excel("C:/Users/paolo/Downloads/data.xlsx")
 data2 <- read_excel("C:/Users/paolo/Downloads/data2.xlsx")
 data3 <- read_excel("C:/Users/paolo/Downloads/data3.xlsx")
