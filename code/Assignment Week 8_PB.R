@@ -53,16 +53,9 @@ df <- df %>%
 #I had to replace the old data with the cleaned up version
 library(dplyr)
 
-
-# Step 2: Merge the cleaned dataset with the new 'schools_new' dataset
-df <- df_cleaned %>%
-  full_join(schools_new, by = c("province", "year"))
-
-View(df)
-
 #or
 
-install.packages("writexl")
+#install.packages("writexl")
 library(writexl)
 write_xlsx(df, "cleaned_dataset.xlsx")
 
@@ -77,14 +70,57 @@ df <- df %>%
     GDP_pc = GDP / population
   )
 
+#PB: This is kind of brutal as data cleaning. We should make sure the sources is correct rather
+#than remove observations that are unplausible!
+
+#df <- df %>%
+#  filter(
+#    students_pc <= 1,
+#    schools_pc <= 0.5,
+#    GDP_pc > 0
+#  )
+
+#View(df)
+
+#PB: that's how I would do:
+#1. I run the plot and include the IDs
+
+library(ggplot2)
+
+ggplot(df, aes(x = GDP_pc, y = students_pc, label = id)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_text(vjust = -1, size = 3) +
+  labs(
+    title = "Students per Capita vs. GDP per Capita",
+    x = "GDP per Capita",
+    y = "Students per Capita"
+  ) +
+  theme_minimal()
+
+#PB: 1962, 1979, 1982, 1983 cannot be used for the anlaysis
+#PB: 2. I remove the years with carry unplausible values
+
+
 df <- df %>%
   filter(
-    students_pc <= 1,
-    schools_pc <= 0.5,
-    GDP_pc > 0
+    !(year %in% c(1962, 1979, 1982, 1983))
   )
 
-View(df)
+ggplot(df, aes(x = GDP_pc, y = students_pc, label = id)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_text(vjust = -1, size = 3) +
+  labs(
+    title = "Students per Capita vs. GDP per Capita",
+    x = "GDP per Capita",
+    y = "Students per Capita"
+  ) +
+  theme_minimal()
+
+#PB: it looks more plausible now
+
+
+
+
 
 #6
 #Plotting data
@@ -100,7 +136,13 @@ ggplot(df, aes(x = GDP_pc, y = students_pc, color = as.factor(year))) +
   ) +
   theme_minimal()
 
-#Something seems to be off with the year 1962 since it is just concentrated at around 0.00. I do not understand why this is happening. Aksi the year 1981, 1982 and 1983 have a lot of outliers. I feel like I have done something wrong. Could you give me feedback on this?
+
+
+#Something seems to be off with the year 1962 since it is just concentrated at around 0.00. I do not understand why this is happening. 
+#Aksi the year 1981, 1982 and 1983 have a lot of outliers. 
+#I feel like I have done something wrong. Could you give me feedback on this?
+
+###PB: this is a vary good point! Why are so many values concentrated around 0? ###
 
 #7
 # New variable
@@ -117,17 +159,27 @@ ggplot(df, aes(x = log_GDP_pc, y = students_pc, color = as.factor(year))) +
     color = "Year"
   ) +
   theme_minimal()
-#Data is mostly gathered around 0.125 with a slight downwoard trend in later years. So, the GDP lowers slighlty in later years and so do students per capita. There are still quite extreme spikes in students in different provinces in the years 1962, 1981, 1982 and 1983.
+
+#Data is mostly gathered around 0.125 with a slight downwoard trend in later years. 
+#So, the GDP lowers slighlty in later years and so do students per capita. 
+#There are still quite extreme spikes in students in different provinces in the years 1962, 1981, 1982 and 1983.
+
+
+###PB: what did the log transformation do? ###
 
 #8
 
-install.packages("fixest")
+#install.packages("fixest")
 library(fixest)
 model <- feols(students_pc ~ log_GDP_pc | province + year, data = df)
 summary(model)
 
 #Coefficient for log_GDP_pc: 0.0157 (positive but small), Not statistically significant (p = 0.503), Within-province variation explained (Within R²): ~0.03% (very low)
-#No strong evidence that changes in GDP per capita within provinces significantly affect students per capita, Most variation in students per capita is explained by differences between provinces and years (fixed effects), Changes in GDP within provinces over time explain very little of the variation in student numbers
+#No strong evidence that changes in GDP per capita within provinces significantly affect students per capita,
+#Most variation in students per capita is explained by differences between provinces and years (fixed effects), 
+#Changes in GDP within provinces over time explain very little of the variation in student numbers
+
+
 
 #9
 #rereun regression
@@ -135,12 +187,18 @@ summary(model)
 model2 <- feols(students_pc ~ log_GDP_pc + family_size | province + year, data = df)
 summary(model2)
 
-#Adding family_size did not materially change the interpretation of log_GDP_pc. Its coefficient and significance remain nearly the same, family_size itself doesn't explain much either — it's not significant, and the model fit barely improved, Neither GDP_pc nor family_size explains meaningful variation in students_pc within provinces over time, The relationship might be driven more by other structural factors or long-term effects not captured in this regression
+#Adding family_size did not materially change the interpretation of log_GDP_pc. 
+#Its coefficient and significance remain nearly the same, 
+#family_size itself doesn't explain much either — it's not significant, 
+#and the model fit barely improved, Neither GDP_pc nor family_size explains meaningful variation in students_pc within provinces over time, The relationship might be driven more by other structural factors or long-term effects not captured in this regression
+
 
 #PartII
-#Do the family size and income have an effect on female labour force participation? -> Variables: Familiy size and income (independent variables) GDP_pc will be used as an indication for income, labour force participation female (dependent variable)
+#Do the family size and income have an effect on female labour force participation? 
+#-> Variables: Familiy size and income (independent variables) GDP_pc will be used as an indication for income, labour force participation female (dependent variable)
 
 library(fixest)
+
 
 # Basic regression with fixed effects
 model <- feols(labour_force_participation_female ~ family_size + GDP_pc | province + year, data = df)
@@ -161,4 +219,6 @@ ggplot(df, aes(x = family_size, y = labour_force_participation_female, color = G
   ) +
   theme_minimal()
 
-#I honestly do not know what the graph is trying to tell me. I must have an issue with my data but I cannot find it.
+#I honestly do not know what the graph is trying to tell me. 
+#I must have an issue with my data but I cannot find it.
+
