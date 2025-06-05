@@ -70,6 +70,7 @@ df <- df %>%
     GDP_pc = GDP / population
   )
 
+View(df)
 #PB: This is kind of brutal as data cleaning. We should make sure the sources is correct rather
 #than remove observations that are unplausible!
 
@@ -87,15 +88,15 @@ df <- df %>%
 
 library(ggplot2)
 
-ggplot(df, aes(x = GDP_pc, y = students_pc, label = id)) +
+ggplot(df, aes(x = GDP_pc, y = students_pc, col = as.factor(year), label = id)) +
   geom_point(size = 2, alpha = 0.7) +
-  geom_text(vjust = -1, size = 3) +
+#  geom_text(vjust = -1, size = 3) +
   labs(
     title = "Students per Capita vs. GDP per Capita",
     x = "GDP per Capita",
     y = "Students per Capita"
   ) +
-  theme_minimal()
+  theme_bw()
 
 #PB: 1962, 1979, 1982, 1983 cannot be used for the anlaysis
 #PB: 2. I remove the years with carry unplausible values
