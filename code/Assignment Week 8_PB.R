@@ -1,5 +1,7 @@
 #Thanks Laura Schepp
 
+library(readxl)
+#Make sure you change you working directory!!
 setwd("C:/Users/paolo/Downloads")
 
 schools <-  read_excel("data.xlsx")
@@ -51,9 +53,6 @@ df <- df %>%
 #I had to replace the old data with the cleaned up version
 library(dplyr)
 
-# Step 1: Remove columns that originally came from the old 'schools' dataset
-df_cleaned <- df %>%
-  select(-starts_with("schools_"), -starts_with("students_"))
 
 # Step 2: Merge the cleaned dataset with the new 'schools_new' dataset
 df <- df_cleaned %>%
