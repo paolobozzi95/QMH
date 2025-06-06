@@ -17,6 +17,11 @@ df <- data %>%
   left_join(data3, by = c("province", "year")) %>%
   left_join(data4, by = c("province", "year"))
 
+unique(df$year)
+
+df %>%
+  distinct(year)
+
 df <- df %>%
  mutate(GDP_pc = GDP / population)
 
