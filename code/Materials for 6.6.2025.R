@@ -17,6 +17,10 @@ df <- data %>%
   left_join(data3, by = c("province", "year")) %>%
   left_join(data4, by = c("province", "year"))
 
+#remove rows with NAs for high schools
+df <- df %>%
+  filter(!is.na(female_primary))
+
 unique(df$year)
 
 df %>%
@@ -38,14 +42,19 @@ left <- ggplot(df, aes(x = as.factor(year), y = GDP_pc)) +
   theme_bw()
 
 
-right <- ggplot(df, aes(x = as.factor(year), y = log10(GDP_pc))) +
+
+right
+right <- ggplot(df, aes(x = as.factor(year), y = GDP_pc)) +
   geom_boxplot() +
-  labs(title = "log(GDP) per Capita by Year (boxplots)",
+  labs(title = "GDP per Capita by Year (boxplots)",
        x = "Year",
        y = "GDP per Capita") +
+  scale_y_continuous(trans = "log10") +
   scale_x_discrete(breaks = as.character(seq(1962, 1988, 3))) + 
   theme_bw()
 
+
+right
 library(gridExtra)
 grid.arrange(left, right, ncol = 2)
 
@@ -62,6 +71,12 @@ data4 <- read_excel("data4.xlsx")
 
 library(dplyr)
 
+
+df <- data %>%
+  left_join(data2, by = c("province", "year")) %>%
+  left_join(data3, by = c("province", "year")) %>%
+  left_join(data4, by = c("province", "year"))
+
 df <- df %>%
   mutate(n_students = students_primary + students_middle,
          n_schools = schools_primary + schools_middle,
@@ -70,18 +85,14 @@ df <- df %>%
          GDP_pc = GDP / population,
          log_GDP_pc = log(GDP_pc))
 
-df <- data %>%
-  left_join(data2, by = c("province", "year")) %>%
-  left_join(data3, by = c("province", "year")) %>%
-  left_join(data4, by = c("province", "year"))
 
 
 df <- df %>%
   mutate(students_schools = n_students / n_schools)
 
 #remove NAs
-df <- df %>%
-  filter(!is.na(students_schools))
+#df <- df %>%
+#  filter(!is.na(students_schools))
 
 library(tidyr)
 df <- df %>%
@@ -124,7 +135,7 @@ mod_1 <- feols(students_schools ~ centre_north | year,
 mod_1
 
 #with fixed effects
-mod_2 <- feols(students_schools ~ log_GDP_pc + centre_north + family_size + population | year, 
+mod_2 <- feols(students_schools ~ log_GDP_pc + centre_north | year, 
                cluster = "province", data = df)
 mod_2
 
