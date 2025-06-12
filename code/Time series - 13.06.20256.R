@@ -162,3 +162,5 @@ model_2 <- lm(GDP_delta_lag1 ~
               , data = df_ts)
 
 summary(model_2)
+
+#End
