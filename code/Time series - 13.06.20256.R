@@ -66,7 +66,6 @@ head(df_ts)
 print(df_ts, n = 30)
 
 #### ARIMA ####
-
 #I want to predict the GDP for the years 1988 to 1990 using an ARIMA model
 library(forecast)
 
@@ -76,7 +75,7 @@ gdp_ts <- ts(df_ts$GDP, start = c(1962), frequency = 1)
 autoplot(gdp_ts) +
   labs(title = "GDP Time Series",
        x = "Year",
-       y = "Log(GDP) in Billions lire") +
+       y = "Billions lire") +
 #  scale_y_continuous(labels = function(x) comma(10^x)) +
   theme_bw()
 
@@ -160,7 +159,7 @@ df_ts <- df_ts %>%
   )
 
 print(df_ts, n = 30)
-
+View(df_ts)
 
 
 #I fit an ARIMAX model with lags
