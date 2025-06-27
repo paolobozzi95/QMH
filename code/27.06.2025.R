@@ -56,7 +56,7 @@ df <- df %>%
 #I plot the data 
 library(ggplot2)
 
-ggplot(df, aes(x = share_votes_DC, y = tax_burden)) +
+p <- ggplot(df, aes(x = share_votes_DC, y = tax_burden)) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE) +
   labs(title = "Correlation between tax burden and DC vote share",
@@ -64,6 +64,8 @@ ggplot(df, aes(x = share_votes_DC, y = tax_burden)) +
        y = "Tax burden",
        color = "Year") +
   theme_bw()
+
+print(p)
 
 #I run the OLS
 
@@ -106,13 +108,15 @@ df <- df %>%
 #plot both share votes DC and fitted share votes DC
 # against share religious
 
-ggplot(df, aes(x = share_religious)) +
+f <- ggplot(df, aes(x = share_religious)) +
   geom_point(aes(y = share_votes_DC), color = "blue", alpha = 0.5) +
   geom_point(aes(y = fit_share_votes_DC), color = "red", alpha = 0.5) +
   labs(title = "Share of votes for DC vs Fitted Share of votes for DC",
        x = "Share of religious marriages",
        y = "Share of votes for DC") +
   theme_bw()
+
+print(f)
 
 #the outlier is the province of Oristano 1982. I checked with the source and it seems correct
 #since however the value is highly unplausible, I remove it
